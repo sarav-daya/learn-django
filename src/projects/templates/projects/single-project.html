@@ -1,0 +1,19 @@
+{% extends 'main.html' %} {% block content %}
+
+<img src="{{ project.featured_image.url }}" alt="">
+
+<h1>{{project.title}}</h1>
+<hr />
+<!-- {% for tag in tags %}
+<span style="border: 1px solid grey; padding: 5px">{{tag}}</span>
+{% endfor %} -->
+
+<div style="margin-top: 30px">
+  {% for tag in project.tags.all %}
+  <span style="border: 1px solid grey; padding: 5px">{{tag}}</span>
+  {% endfor %}
+</div>
+
+<p>{{project.description}}</p>
+
+{%endblock content %}
