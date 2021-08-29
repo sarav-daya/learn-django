@@ -1,50 +1,69 @@
+let projectsURL = "http://127.0.0.1:8000/api/projects";
 
-//GET SEARCH FORM AND PAGE LINKS
-let searchForm = document.getElementById('searchForm')
-let pageLinks = document.getElementsByClassName('page-link')
-
-//ENSURE SEARCH FORM EXISTS
-if (searchForm) {
-    for (let i = 0; pageLinks.length > i; i++) {
-        pageLinks[i].addEventListener('click', function (e) {
-            e.preventDefault()
-
-            //GET THE DATA ATTRIBUTE
-            let page = this.dataset.page
-
-            //ADD HIDDEN SEARCH INPUT TO FORM
-            searchForm.innerHTML += `<input value=${page} name="page" hidden/>`
-
-
-            //SUBMIT FORM
-            searchForm.submit()
+let getProjects = () => {
+    fetch(projectsURL)
+        .then(response => response.json())
+        .then(data => {
+            builProjects(data);
+            addVoteEvents();
         })
+        .catch(err => {
+            console.log(err);
+        })
+};
+
+
+let builProjects = (projects) => {
+    let projectWrapper = document.getElementById("projects-wrapper");
+
+    for (let i = 0; projects.length > i; i++) {
+        let project = projects[i];
+        let projectCard = `
+            <div class="project-card">
+                <img src="http://127.0.0.1:8000${project.featured_image}" />
+
+                <div>
+                    <div class="card--header">
+                        <h3>${project.title}</h3>
+                        <strong class="vote--option" data-vote="up" data-project="${project.id}">&#43;</strong>
+                        <strong class="vote--option" data-vote="down" data-project="${project.id}">&#8722;</strong>
+                    </div>
+                    <i>${project.vote_ratio}% Positive feedback</i>
+                    <p>${project.description.substring(0,150)}</p>
+                </div>
+            </div>
+        `
+        projectWrapper.innerHTML += projectCard;
+    }
+};
+
+let addVoteEvents = () => {
+    let voteButtons = document.getElementsByClassName('vote--option');
+
+    for (let i = 0; voteButtons.length > i; i++) {
+        voteButtons[i].addEventListener('click', (e) => {
+            let token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjMwMjA0NTQzLCJqdGkiOiI5MGQ4ZGQyOTExMjI0ZmQwODI1NjIyMWMzMmRlYTBjMCIsInVzZXJfaWQiOjExfQ.BcbeG_0n_aVCnWD5DHJEnHedBwfRvOViKvnOImm7VhE";
+            let vote = e.target.dataset.vote;
+            let projectid = e.target.dataset.project;
+
+            fetch(`http://127.0.0.1:8000/api/projects/${projectid}/vote/`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        'value': vote
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("success");
+
+                })
+                .catch(error => console.log(error))
+        });
     }
 }
 
-
-
-let tags = document.getElementsByClassName('project-tag')
-
-for (let i = 0; tags.length > i; i++) {
-    tags[i].addEventListener('click', (e) => {
-        let tagId = e.target.dataset.tag
-        let projectId = e.target.dataset.project
-
-        // console.log('TAG ID:', tagId)
-        // console.log('PROJECT ID:', projectId)
-
-        fetch('http://127.0.0.1:8000/api/remove-tag/', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 'project': projectId, 'tag': tagId })
-        })
-            .then(response => response.json())
-            .then(data => {
-                e.target.remove()
-            })
-
-    })
-}
+getProjects();

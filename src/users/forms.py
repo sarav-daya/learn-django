@@ -44,8 +44,6 @@ class ProfileForm(ModelForm):
         for name, field in self.fields.items():
             field.widget.attrs.update({"class": "input"})
         
-        print(self.fields['profile_image'].widget)
-
 class SkillForm(ModelForm):
     class Meta:
         model = Skill

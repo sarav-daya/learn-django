@@ -47,7 +47,7 @@ def user_account(request):
 
 
 def login_page(request):
-    print(request.GET.get("next"))
+
     if request.user.is_authenticated:
         return redirect("profiles")
 
